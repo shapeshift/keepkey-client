@@ -1,7 +1,7 @@
 /*
     Primary Application Module
 
-      Pioneer Platform
+      KeepKey Platform
 
           -highlander
  */

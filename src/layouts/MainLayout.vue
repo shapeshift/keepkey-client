@@ -11,20 +11,6 @@
       </q-item>
       <small><animated-number :value="totalValueUsd" :formatValue="formatToPriceUSD" :duration="duration"/></small>
 
-      <div v-if="featureApps || true">
-        <AppSwitcher />
-      </div>
-
-      <q-item clickable to="/invocations" class="justify-center user-header" style="">
-        <q-icon size=md name="published_with_changes"></q-icon>
-      </q-item>
-
-      <div v-if="featureContacts">
-        <q-item clickable to="/contacts" class="justify-center user-header" style="">
-          <q-icon size=md name="admin_panel_settings"></q-icon>
-        </q-item>
-      </div>
-
       <div>
         <q-item clickable to="/settings">
           <q-avatar class="justify-center user-header" color="primary" style="">
@@ -45,7 +31,6 @@
 
 <script>
 import AnimatedNumber from "animated-number-vue";
-import AppSwitcher from 'components/AppSwitcher';
 import AppModal from '../components/Dialog';
 import { mapMutations, mapGetters } from 'vuex';
 
@@ -62,7 +47,6 @@ export default {
   name: 'MainLayout',
 
   components: {
-    AppSwitcher,
     AppModal,
     AnimatedNumber
   },
