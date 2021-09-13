@@ -4,12 +4,6 @@
     <div>
       <h6>Settings</h6>
       <q-card inline>
-        <q-card-section>
-          <div class="text-h6">PioneerUrl: {{pioneerUrl}}</div>
-          <div class="text-h6">username: {{username}}</div>
-          <div class="text-subtitle2">queryKey: {{queryKey}}</div>
-        </q-card-section>
-
         <q-card-actions align="right">
           <q-btn @click="openEditConfig">edit config <q-icon name="settings"></q-icon></q-btn>
           <q-btn @click="deleteConfig" color="red">delete config <q-icon name="warning"></q-icon></q-btn>
@@ -86,7 +80,6 @@
     <div>
       <h6>Open Dialog</h6>
       <q-card inline>
-        <q-btn @click="openDialog('Pair')">Pair</q-btn>
         <q-btn @click="openDialog('Pin')">Pin</q-btn>
         <q-btn @click="openDialog('Setup')">Setup</q-btn>
       </q-card>

@@ -1,7 +1,6 @@
 <template>
   <q-card class="text-center q-pb-lg">
     <q-card-section>
-      <h4>Attempting to Start Wallet!</h4>
       <q-spinner
         color="primary"
         size="5rem"
@@ -32,24 +31,10 @@
             <q-item-section>
               Devices: {{devices}}</q-item-section>
           </q-item>
-          <q-item clickable v-ripple>
-            <q-item-section>
-              Username: {{username}}</q-item-section>
-          </q-item>
 
           <q-item clickable v-ripple>
             <q-item-section>
               <q-item-section>
-                QueryKey: {{queryKey}}</q-item-section>
-            </q-item-section>
-          </q-item>
-
-          <q-item clickable v-ripple>
-            <q-item-section>
-              <q-item-section>
-                <br/>
-                total Value: {{totalValueUsd}}
-
                 <br/>
 <!--                Master BTC:{{masterAddressBtc}}-->
 
@@ -60,23 +45,6 @@
           </q-item>
         </q-list>
       </div>
-
-<!--      <q-btn-->
-<!--        color="primary"-->
-<!--        @click="addWallet"-->
-<!--        label="Add an additional Wallet"-->
-<!--        size="lg"-->
-<!--        class="font-weight-medium q-pl-md q-pr-md"-->
-<!--        style="font-size:1rem;"-->
-<!--      ></q-btn>-->
-<!--      <q-btn-->
-<!--        color="primary"-->
-<!--        @click="addPath"-->
-<!--        label="Add Path"-->
-<!--        size="lg"-->
-<!--        class="font-weight-medium q-pl-md q-pr-md"-->
-<!--        style="font-size:1rem;"-->
-<!--      ></q-btn>-->
 
       <div v-if="isReady">
         <q-btn
