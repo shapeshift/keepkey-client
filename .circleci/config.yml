@@ -22,6 +22,7 @@ jobs:
       - run: quasar --version
       - run: npm i
       - run: GH_TOKEN=$GH_TOKEN npm run build-electron-publish-mac
+      - run: npm run test
   build-native-linux:
     executor: pulumi
     steps:

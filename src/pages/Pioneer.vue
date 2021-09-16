@@ -12,17 +12,6 @@
           </div>
         </div>
         <div v-if="context">
-          <div class="">
-            Apps: {{apps}}
-          </div>
-          <div>
-            <q-btn
-              @click="openPair"
-              color="primary"
-              label="Pair"
-            ></q-btn>
-          </div>
-
           <div>
             <q-btn-dropdown
               color="green"
@@ -65,12 +54,12 @@
                   </q-item-section>
 
                   <q-item-section>
-                    {{coin.symbol}}
+                    {{coin.symbol}} Address: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].master}}
                   </q-item-section>
 
                   <q-item-section side>
                     <div>
-                      ({{coin.symbol}}) {{walletContext.balances[coin.symbol]}}
+                      <q-icon @click=copyAddress(coin.symbol) name="content_copy"></q-icon>
                     </div>
 <!--                    <animated-number :value="walletContext.valueUsds[coin.symbol]" :formatValue="formatToPriceUSD" :duration="duration"/>-->
                   </q-item-section>
@@ -78,6 +67,9 @@
 
                 <q-card>
                   <q-card-section style="word-wrap: break-word;">
+<!--                    <small>raw: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)}}</small>-->
+                    <small>raw: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].blockchain}}</small>
+                    <small>raw: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].blockchain}}</small>
                     <small>script type: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].script_type}}</small>
                       <q-separator />
                       Address: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].master}} <br/>
