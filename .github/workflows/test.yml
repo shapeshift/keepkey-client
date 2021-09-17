@@ -1,4 +1,4 @@
-name: Lint Commit Messages
+name: Build and Test KeepKey Client
 on:
   push:
     branches-ignore:
@@ -9,17 +9,20 @@ on:
       - develop
 
 jobs:
-  commitlint:
-    runs-on: macos-latest
+  build-and-test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
     steps:
       - uses: actions/checkout@v1
         with:
           fetch-depth: 0
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '14'
           cache: 'npm'
       - run: npm run npm
-      - run: npm run build-electron-publish-mac
+      - run: npm run build-electron-publish-${{ matrix.os }}
       - run: npm run test
