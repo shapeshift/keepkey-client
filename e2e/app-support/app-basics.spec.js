@@ -9,6 +9,8 @@ describe('Application launch', function () {
   jest.setTimeout('30000')
 
   beforeEach(function () {
+    //windows path
+
     this.app = new Application({
       path: './dist/electron/Packaged/mac/keepkey-client.app/Contents/MacOS/keepkey-client',
     })

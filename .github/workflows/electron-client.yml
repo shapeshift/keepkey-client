@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['windows-latest', 'macos-latest']
+        os: ['windows-latest']
     steps:
       - uses: actions/checkout@v1
         with:
@@ -25,4 +25,4 @@ jobs:
           cache: 'npm'
       - run: npm run npm
       - run: npm run build-electron-publish-${{ matrix.os }}
-      - run: npm run test
+#      - run: npm run test
