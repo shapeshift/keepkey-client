@@ -6,7 +6,7 @@
   "productName": "keepkey-client",
   "author": "highlander <bithighlander@gmail.com>",
   "repository": {
-    "url": "https://github.com/bithighlander/keepkey-client"
+    "url": "https://github.com/shapeshift/keepkey-client"
   },
   "scripts": {
     "npm": "npm i",
