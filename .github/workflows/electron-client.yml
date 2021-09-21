@@ -24,5 +24,7 @@ jobs:
           node-version: '14'
           cache: 'npm'
       - run: npm run npm
-      - run: GH_TOKEN=${{ secrets.GH_TOKEN }} npm run build-electron-publish-${{ matrix.os }}
+      - run: npm run build-electron-publish-${{ matrix.os }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 #      - run: npm run test
