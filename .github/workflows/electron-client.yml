@@ -15,8 +15,6 @@ jobs:
       matrix:
         os: ['windows-latest']
     steps:
-      env:
-        GH_TOKEN: ${{ secrets.GH_TOKEN }}
       - uses: actions/checkout@v1
         with:
           fetch-depth: 0
@@ -27,4 +25,6 @@ jobs:
           cache: 'npm'
       - run: npm run npm
       - run: npm run build-electron-publish-${{ matrix.os }}
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
 #      - run: npm run test
