@@ -79,7 +79,7 @@ only_release_canidate: &only_release_canidate
 
 workflows:
   version: 2
-  pioneer-native:
+  keepkey-native:
     jobs:
       - build-native-mac
       - build-native-windows

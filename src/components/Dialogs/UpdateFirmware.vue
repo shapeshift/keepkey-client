@@ -21,7 +21,7 @@
 
       Username Dialog
 
-      Verify connected to pioneer:
+      Verify connected to keepkey:
 
       Offer changing of url if not live
 
@@ -36,58 +36,33 @@
     data () {
       return {
         error:false,
-        pioneerLive:false,
         acceptTerms:false,
         username: "",
         usePrivateNode: false,
-        // pioneerUrl:"",
         password:""
       }
     },
     async mounted() {
       try{
-        // console.log("env var: ",process.env['URL_PIONEER_SPEC'])
-        // this.pioneerUrl = process.env['URL_PIONEER_SPEC']
-        this.$q.electron.ipcRenderer.send('checkPioneerUrl', {});
+
 
       }catch(e){
         console.error(e)
       }
     },
     watch: {
-      "$store.state.pioneerUrl": {
-        handler: function(value) {
-          console.log("pioneerUrl value: ",value)
-          this.pioneerUrl = value
-        },
-        immediate: true
-      },
-      "$store.state.pioneerLive": {
-        handler: function(value) {
-          console.log("pioneerLive value: ",value)
-          this.pioneerLive = value
-        },
-        immediate: true
-      }
+
     },
     methods: {
       ...mapMutations(['showModal','hideModal']),
       onSetupPioneer: async function () {
-        console.log("Setup Pioneer")
-        this.showModal('Pioneer')
+
+
       },
       onSubmitQuick: async function () {
         console.log("onSubmit")
 
-        //if accepted terms
-        if(this.acceptTerms){
-          this.$q.electron.ipcRenderer.send('setPioneerUrl', {});
-          this.hideModal()
-          this.showModal('SetupUsername')
-        }else{
-          console.error("Must Accept terms!")
-          alert("Must Accept terms!")
-        }
+
       },
       accept () {
         console.log("clicked checkbox")
@@ -97,7 +72,7 @@
         this.hideModal()
       },
       onReset () {
-        this.username = null
+
       },
       openSetup: function () {
         this.hideModal()

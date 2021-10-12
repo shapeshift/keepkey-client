@@ -4,15 +4,13 @@
     <div
       class="homerow dark-panel has-border has-border-right menu text-center column no-wrap justify-between q-electron-drag"
     >
-      <q-item clickable to="/pioneer" class="justify-center user-header" style="padding-top: 30px">
-        <q-avatar @click="refreshPioneer">
+      <q-item clickable to="/main" class="justify-center user-header" style="padding-top: 30px">
+        <q-avatar @click="openMain">
           <q-img src="~assets/box-logo.png"></q-img>
         </q-avatar>
       </q-item>
-      <small><animated-number :value="totalValueUsd" :formatValue="formatToPriceUSD" :duration="duration"/></small>
-
       <div>
-        <q-item clickable to="/settings">
+        <q-item @click="openSettings" class="justify-center">
           <q-avatar class="justify-center user-header" color="primary" style="">
             <q-icon size=md name="settings"></q-icon>
           </q-avatar>
@@ -30,41 +28,22 @@
 </template>
 
 <script>
-import AnimatedNumber from "animated-number-vue";
 import AppModal from '../components/Dialog';
 import { mapMutations, mapGetters } from 'vuex';
-
-//feature flags
-let featureApps = process.env['APPS_FEATURE']
-let featureKeepkey = process.env['KEEPKEY_FEATURE']
-let featureUiTheme = process.env['UI_THEME_FEATURE']
-let featureUiLightMode = process.env['UI_LIGHT_MODE_FEATURE']
-let featureAddWallet = process.env['ADD_WALLET_FEATURE']
-let featureContacts = process.env['CONTACTS_FEATURE']
-let featureFio = process.env['FIO_FEATURE']
 
 export default {
   name: 'MainLayout',
 
   components: {
     AppModal,
-    AnimatedNumber
   },
   data() {
     return {
-      featureApps,
-      featureKeepkey,
-      featureUiTheme,
-      featureUiLightMode,
-      featureAddWallet,
-      featureContacts,
-      featureFio,
       duration: 500,
       totalValueUsd: 0,
       keepkeyConnected:false,
       confirm: false,
       darkMode: true,
-      password: '',
       opened: false,
       isLoggedIn: false,
       leftDrawerOpen: true,
@@ -100,9 +79,6 @@ export default {
       console.log("Main Layout Mounted!")
       //Open connect
 
-      //support partial setup exit
-      this.$q.electron.ipcRenderer.send('continueSetup', {})
-
 
     } catch (e) {
       console.error(e);
@@ -119,29 +95,9 @@ export default {
     openPin() {
       this.showModal('Pin')
     },
-    onAddWallet() {
-      this.showModal('Setup')
-    },
-    //refreshPioneer
-    async refreshPioneer() {
-      console.log("refresh everything!")
-      //refresh
-      this.$q.electron.ipcRenderer.send('refreshPioneer', {});
-
-      //get all the things
-      let context = await this.$store.getters['getContext']
-      let username = await this.$store.getters['getUsername']
-      let total = await this.$store.getters['getTotal']
-      let walletsLoaded = await this.$store.getters['wallets']
-      let devicesLoaded = await this.$store.getters['devices']
-      let isPioneerLive = await this.$store.getters['getPioneerLive']
-      let pioneerUrl = await this.$store.getters['getPioneerUrl']
-      let seed = await this.$store.getters['getMnemonic']
-      let balances = await this.$store.getters['getBalances']
-
-      this.totalValueUsd = total
-      console.log("STATE: ",{context,username,total,walletsLoaded,devicesLoaded,isPioneerLive,pioneerUrl,seed,balances})
-
+    openMain() {
+      console.log("Naving to settings!")
+      this.$router.go('Main');
     },
     openSettings() {
       console.log("Naving to settings!")
@@ -183,27 +139,6 @@ export default {
     }
   },
   watch: {
-    "$store.state.pioneerUrl": {
-      handler: function(value) {
-        this.pioneerUrl = value
-      },
-      immediate: true
-    },
-    "$store.state.pioneerLive": {
-      handler: function(value) {
-        this.pioneerLive = value
-      },
-      immediate: true
-    },
-    "$store.state.totalUsd": {
-      handler: function() {
-        //get value
-        const totalUsd = this.$store.getters['getTotal'];
-        this.totalValueUsd = totalUsd
-        console.log("totalUsd: ",totalUsd)
-      },
-      immediate: true // provides initial (not changed yet) state
-    },
     "$store.state.keepkeyConnected": {
       handler: function(value) {
         this.keepkeyConnected = true

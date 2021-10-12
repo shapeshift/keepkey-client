@@ -39,73 +39,18 @@
               </q-list>
             </q-btn-dropdown>
           </div>
-
-          <div class="q-pa-md" style="max-width: 550px">
-<!--            {{coins}}-->
-            <div v-for="coin in coins" :key="coin.symbol">
-<!--                          {{coin}}-->
-<!--                          {{coin.symbol}}-->
-<!--                          {{coin.icon}}-->
-              <q-expansion-item style="width:550px;">
-                <template v-slot:header style="width:550px;">
-
-                  <q-item-section avatar>
-                    <q-img :src="coin.icon"></q-img>
-                  </q-item-section>
-
-                  <q-item-section>
-                    {{coin.symbol}} Address: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].master}}
-                  </q-item-section>
-
-                  <q-item-section side>
-                    <div>
-                      <q-icon @click=copyAddress(coin.symbol) name="content_copy"></q-icon>
-                    </div>
-<!--                    <animated-number :value="walletContext.valueUsds[coin.symbol]" :formatValue="formatToPriceUSD" :duration="duration"/>-->
-                  </q-item-section>
-                </template>
-
-                <q-card>
-                  <q-card-section style="word-wrap: break-word;">
-<!--                    <small>raw: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)}}</small>-->
-                    <small>raw: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].blockchain}}</small>
-                    <small>raw: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].blockchain}}</small>
-                    <small>script type: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].script_type}}</small>
-                      <q-separator />
-                      Address: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].master}} <br/>
-                      {{copyText}}
-                      <q-icon @click=copyAddress(coin.symbol) name="content_copy"></q-icon>
-                      <q-separator />
-<!--                  path: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0]}}-->
-                      <q-separator />
-                      <small>xpub: {{walletContext.pubkeys.filter(e => e.symbol === coin.symbol)[0].pubkey}}</small>
-                  </q-card-section>
-                </q-card>
-              </q-expansion-item>
-
-              <q-separator />
-
-            </div>
-          </div>
-
         </div>
       </q-card>
   </q-page>
 </template>
 
 <script>
-  import { ipcRenderer } from 'electron'
-  import accountSelector from '../components/AccountSelector'
   import { mapMutations, mapGetters } from 'vuex'
-  import VueGridLayout from 'vue-grid-layout';
   import { copyToClipboard } from 'quasar'
-  import AnimatedNumber from "animated-number-vue";
-  import AppSwitcher from "components/AppSwitcher";
-  import AppModal from "components/Dialog";
 
 
   export default {
-    name: 'Pioneer',
+    name: 'Main',
     components: {
       // AnimatedNumber
     },
@@ -138,22 +83,6 @@
         })
         setTimeout(this.updateWalletContext,2000)
 
-        //TODO why the f do I need this, and watchers not working?
-        ipcRenderer.on('refreshPioneer', (event, data) => {
-          console.log("Refresh Pioneer! **** pioneer.vue")
-          //
-          this.updateWalletContext()
-        })
-
-        ipcRenderer.on('setContext', (event, data) => {
-          console.log("setContext: ",data.context)
-          this.context = data.context
-
-          //update wallet context
-          this.updateWalletContext()
-
-        })
-
       }catch(e){
         console.error(e)
       }
@@ -169,9 +98,6 @@
       },
       "$store.state.wallets": {
         handler: function(value) {
-          console.log("value: ",value)
-          //get value
-          this.updateWalletContext()
         },
         immediate: true
       }
@@ -185,38 +111,7 @@
         console.log("Main Click")
       },
       updateWalletContext() {
-        this.context = this.$store.getters['getContext'];
-        console.log("this.context: ",this.context)
 
-        //get value
-        this.wallets = this.$store.getters['wallets'];
-        if(this.wallets.length > 0){
-          let currentWallet = this.wallets.filter(e => e.context === this.context)
-          currentWallet = currentWallet[0]
-          console.log("currentWallet: ",currentWallet)
-          if(currentWallet && currentWallet.masters){
-            this.walletContext = currentWallet
-            console.log("masters:",currentWallet.masters)
-            console.log("coins:",Object.keys(currentWallet.masters))
-            let coins = Object.keys(currentWallet.masters)
-            let coinList = []
-            for(let i = 0; i < coins.length; i++){
-              let coin = coins[i]
-              coinList.push({
-                symbol:coin,
-                icon:"https://static.coincap.io/assets/icons/svg/"+coin.toLowerCase()+".svg",
-              })
-            }
-            this.coins = coinList
-          }else{
-            //invalid, force update to a valid wallet
-            this.context = this.wallets[0].context
-            this.$q.electron.ipcRenderer.send('updateContext', {
-              context:this.context,
-              reason:"current context not in wallet array!"
-            });
-          }
-        }
       },
       openPair(item) {
         console.log("item Click: ",item)

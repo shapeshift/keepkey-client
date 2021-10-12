@@ -17,33 +17,13 @@
     </q-card-section>
     <q-card-actions vertical align="left" class="q-pb-lg">
       <div class="q-pa-md text-white">
-        <q-list align="left" separator style="width: 418px">
-          <q-item clickable v-ripple>
+        <q-item clickable v-ripple>
+          <q-item-section>
             <q-item-section>
-              context: {{context}}
+              <br/>
             </q-item-section>
-          </q-item>
-          <q-item clickable v-ripple>
-            <q-item-section>
-              Wallets: {{walletContexts}}</q-item-section>
-          </q-item>
-          <q-item clickable v-ripple>
-            <q-item-section>
-              Devices: {{devices}}</q-item-section>
-          </q-item>
-
-          <q-item clickable v-ripple>
-            <q-item-section>
-              <q-item-section>
-                <br/>
-<!--                Master BTC:{{masterAddressBtc}}-->
-
-<!--                <br/>-->
-<!--                Master ETH: {{masterAddressEth}}-->
-              </q-item-section>
-            </q-item-section>
-          </q-item>
-        </q-list>
+          </q-item-section>
+        </q-item>
       </div>
 
       <div v-if="isReady">
@@ -83,14 +63,6 @@
         devices:[],
         context:"",
         isReady:false,
-        masterAddressBtc:"",
-        masterAddressEth:"",
-        totalValueUsd:0,
-        isUsernameValid:false,
-        isQuerykeyActive:false,
-        isWalletLoaded:false,
-        isWalletCorrect:false,
-        pioneerUrl:"",
         error:false,
         username: "",
         password: "",
@@ -113,52 +85,6 @@
           console.log("watch: this.context: ",this.context)
         },
         immediate: true
-      },
-      "$store.state.walletContexts": {
-        handler: function(value) {
-          //get value
-          this.walletContexts = this.$store.getters['getWalletContexts'];
-          console.log("wallets: ",this.walletContexts)
-        },
-        immediate: true
-      },
-      "$store.state.wallets": {
-        handler: function(value) {
-          //get value
-          this.wallets = this.$store.getters['getWallets'];
-          console.log("wallets: ",this.wallets)
-          //if wallets and context then ready
-          if(this.wallets.length > 0 && this.context){
-            this.isReady = true;
-          }
-        },
-        immediate: true
-      },
-      "$store.state.totalUsd": {
-        handler: function(value) {
-          //get value
-          const totalUsd = this.$store.getters['getTotal'];
-          console.log("TOTAL USD: ",totalUsd)
-          this.totalValueUsd = totalUsd
-
-        },
-        immediate: true // provides initial (not changed yet) state
-      },
-      "$store.state.username": {
-        handler: function(value) {
-          //get value
-          this.username = this.$store.getters['getUsername'];
-          console.log("username: ",this.username)
-        },
-        immediate: true // provides initial (not changed yet) state
-      },
-      "$store.state.queryKey": {
-        handler: function(value) {
-          //get value
-          this.queryKey = this.$store.getters['getQueryKey'];
-          console.log("username: ",this.username)
-        },
-        immediate: true // provides initial (not changed yet) state
       }
     },
     computed: {
@@ -168,35 +94,6 @@
       ...mapMutations(['showModal','hideModal']),
       onStart () {
         this.$q.electron.ipcRenderer.send('onStart', {});
-      },
-      async refreshPioneer() {
-        console.log("refresh everything!")
-        //refresh
-        this.$q.electron.ipcRenderer.send('refreshPioneer', {});
-
-        //TODO why is this bs needed!!??
-        //get all the things
-        this.context = await this.$store.getters['getContext']
-        this.username = await this.$store.getters['getUsername']
-        this.queryKey = await this.$store.getters['getQueryKey']
-        let total = await this.$store.getters['getTotal']
-        // this.wallets = await this.$store.getters['wallets']
-        this.devices = await this.$store.getters['devices']
-        this.isPioneerLive = await this.$store.getters['getPioneerLive']
-        let pioneerUrl = await this.$store.getters['getPioneerUrl']
-        let seed = await this.$store.getters['getMnemonic']
-        let balances = await this.$store.getters['getBalances']
-        this.totalValueUsd = total
-        console.log("STATE: ",this)
-        //console.log("STATE: ",{context:this.context, testnet,username,total,walletsLoaded,devicesLoaded,isPioneerLive,pioneerUrl,seed,balances})
-
-        //if wallets and context then ready
-        if(this.wallets.length > 0 && this.context){
-          this.isReady = true;
-        } else {
-          console.log("Wallet not ready to start!")
-        }
-
       },
       startPlatform: function () {
         this.hideModal()

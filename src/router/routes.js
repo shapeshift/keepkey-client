@@ -3,7 +3,7 @@
 const routes = [
   {
     path: '/',
-    redirect: '/pioneer',
+    redirect: '/main',
     component: () => import('layouts/MainLayout.vue'),
     children: [
       {
@@ -13,21 +13,9 @@ const routes = [
         props: true
       },
       {
-        path: '/contacts',
-        name: 'Contacts',
-        component: () => import('pages/Contacts.vue'),
-        props: true
-      },
-      {
-        path: '/invocations',
-        name: 'Invocations',
-        component: () => import('pages/Invocations.vue'),
-        props: true
-      },
-      {
-        path: '/pioneer',
-        name: 'Pioneer',
-        component: () => import('pages/Pioneer.vue'),
+        path: '/main',
+        name: 'Main',
+        component: () => import('pages/Main.vue'),
         props: true
       },
       {
@@ -35,11 +23,6 @@ const routes = [
         name: 'KeepKey',
         component: () => import('pages/KeepKey.vue'),
         props: true
-      },
-      {
-        path: '/appStore',
-        name: 'AppStore',
-        component: () => import('pages/AppStore.vue')
       }
     ]
   }

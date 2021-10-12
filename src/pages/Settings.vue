@@ -16,37 +16,14 @@
         <div v-for="wallet in wallets" :key="wallet.type">
           <q-card>
             <q-card-title>
-              <div v-if="wallet.type === 'keepkey'">
+
                 <q-img src="~assets/box-logo.png"
                        spinner-color="red"
                        :ratio="1/1"
                        style="height: 30px; max-width: 70px">
                 </q-img>
-              </div>
-              <div v-if="wallet.type === 'software'">
-                <q-icon size=xl name="account_balance_wallet" />
-              </div>
-              <br/>
-              type: {{ wallet.type }}
-              <br/>
-              name: {{ wallet.name }}
-              <br/>
-              value: {{ formatToPriceUSD(wallet.totalValueUsd) }}
-              <br/>
-              <!--            Master ETH: {{ wallet.public.ETH.master }}-->
-              <!--            assets: {{ wallet.assets }}-->
-              <!--            assets: {{ wallet.features.deviceId }}-->
-              <!--            id: {{ wallet.features.id }}-->
-              <!--            <q-rating slot="subtitle" v-model="stars" :max="5" />-->
-              <div slot="right" class="row items-center">
-                <!--              <q-icon name="place" /> 250 ft-->
-              </div>
+
             </q-card-title>
-            <q-card-main>
-              <!--            label: {{ wallet.features }}-->
-              <!--            majorVersion: {{ wallet.features.majorVersion }}-->
-              <!--            label: {{ wallet.features.majorVersion }}-->
-            </q-card-main>
             <q-card-separator />
             <q-card-actions>
               <q-btn flat round small><q-icon name="settings" /></q-btn>
@@ -60,9 +37,6 @@
                     <q-item @click="wipeDevice(wallet.name)" tag="label" v-ripple>
                       Wipe
                     </q-item>
-                    <!--                  <q-item @click="openViewSeed(wallet.name)" tag="label" v-ripple>-->
-                    <!--                    View Seed-->
-                    <!--                  </q-item>-->
                     <q-item tag="label" v-ripple>
                     </q-item>
                   </q-list>
@@ -90,9 +64,6 @@
 </template>
 
 <script>
-  // import {
-  //   deleteConfig,
-  // } from '@pioneer-platform/pioneer-config'
   const remote = require('electron').remote
   import {mapGetters, mapMutations} from "vuex";
 
@@ -100,16 +71,6 @@
   name: 'Settings',
   data () {
     return {
-      wallets:[],
-      pioneerLive:false,
-      isLoggedIn:false,
-      pioneerUrl:'',
-      username:'',
-      queryKey:'',
-      userEmail:'',
-      userId:'',
-      twoFactorEnabled:false,
-      verificationStatus:''
     }
   },
   mounted() {
@@ -131,53 +92,12 @@
     }
   },
   watch: {
-    "$store.state.pioneerUrl": {
-      handler: function() {
-        this.pioneerUrl = this.$store.getters['getPioneerUrl'];
-        console.log("Settings: pioneerUrl: ",this.pioneerUrl)
-      },
-      immediate: true
-    },
-    "$store.state.pioneerLive": {
-      handler: function() {
-        this.pioneerLive = this.$store.getters['getPioneerLive'];
-        console.log("Settings: pioneerLive: ",this.pioneerLive)
-      },
-      immediate: true
-    },
-    "$store.state.username": {
-      handler: function (value) {
-        console.log("username loaded!")
-        this.username = this.$store.getters['getUsername'];
-      },
-      immediate: true // provides initial (not changed yet) state
-    },
-    "$store.state.queryKey": {
-      handler: function (value) {
-        console.log("username loaded!")
-        console.log("value: ",value)
-      },
-      immediate: true // provides initial (not changed yet) state
-    },
-    "$store.state.wallets": {
-      handler: function (value) {
-        this.wallets = this.$store.getters['getWallets'];
-      },
-      immediate: true // provides initial (not changed yet) state
-    }
   },
   methods: {
     ...mapMutations(['showModal','hideModal']),
     openEditConfig(){
       //open view seed
       this.showModal('Config')
-    },
-    formatToPriceUSD(value) {
-      return `$ ${Number(value).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
-    },
-    openViewSeed(wallet){
-      //open view seed
-      this.$q.electron.ipcRenderer.send('viewSeed', {wallet});
     },
     updateFirmware(wallet){
       //open view seed

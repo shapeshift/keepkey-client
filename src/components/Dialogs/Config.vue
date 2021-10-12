@@ -26,9 +26,6 @@
 
 <script>
 
-    // import {
-    //   getConfig,
-    // } from '@pioneer-platform/pioneer-config'
     import {mapGetters, mapMutations} from "vuex";
     export default {
         name: "Config",

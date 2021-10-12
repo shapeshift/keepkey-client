@@ -87,15 +87,6 @@ export const languages = [
   }
 ]
 
-export const pioneerPath = path.join(APP.getPath('home'), '.pioneer')
-export const pioneerConfig = path.join(APP.getPath('home'), '.pioneer', 'pioneer.json')
-export const configPath = path.join(APP.getPath('home'), '.pioneer', 'pioneer.json')
-export const seedDir = path.join(APP.getPath('home'), '.pioneer', 'wallet_data')
-export const seedPath = path.join(
-  APP.getPath('home'),
-  '.pioneer',
-  'wallet_data/wallet.seed'
-)
 
 // XMR not implemented
 // export const seedPath = path.join(APP.getPath('home'), '.pioneer', 'wallet_data/wallet.seed')

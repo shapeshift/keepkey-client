@@ -1,6 +1,6 @@
 const Application = require('spectron').Application
 const assert = require('assert')
-const log = require("@pioneer-platform/loggerdog")()
+
 
 
 //TODO dectect host and run tests per OS
@@ -10,7 +10,8 @@ describe('Application launch', function () {
 
   beforeEach(function () {
     this.app = new Application({
-      path: './dist/electron/Packaged/mac/keepkey-client.app/Contents/MacOS/keepkey-client',
+      path: './dist/electron/Packaged/mac/Electron.app/Contents/MacOS/Electron',
+      // path: './dist/electron/Packaged/mac/keepkey-client.app/Contents/MacOS/keepkey-client',
     })
     return this.app.start()
   })

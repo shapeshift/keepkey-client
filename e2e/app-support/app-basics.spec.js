@@ -1,6 +1,6 @@
 const Application = require('spectron').Application
 const assert = require('assert')
-const log = require("@pioneer-platform/loggerdog")()
+
 
 
 //TODO dectect host and run tests per OS
@@ -12,7 +12,9 @@ describe('Application launch', function () {
     //windows path
 
     this.app = new Application({
-      path: './dist/electron/Packaged/mac/keepkey-client.app/Contents/MacOS/keepkey-client',
+      //dist/electron/Packaged/mac/Electron.app/Contents/MacOS/Electron
+      path: './dist/electron/Packaged/mac/Electron.app/Contents/MacOS/Electron',
+      // path: './dist/electron/Packaged/mac/keepkey-client.app/Contents/MacOS/keepkey-client',
     })
     return this.app.start()
   })
@@ -33,10 +35,9 @@ describe('Application launch', function () {
   it('has correct title name', async function () {
     try{
       let title = await this.app.client.getTitle()
-      log.info("title: ",title)
+
 
       //string "mac os x"
-      log.info("this.app: ",this.app.client.platformName)
 
       assert(title,'keepkey-client')
     }catch(e){
@@ -47,7 +48,7 @@ describe('Application launch', function () {
   //is visable
   it('is window visable', async function () {
     try{
-      log.info("this.app: ",this.app.browserWindow)
+
 
       assert(this.app.browserWindow.isVisible())
 

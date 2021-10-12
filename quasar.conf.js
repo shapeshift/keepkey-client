@@ -51,10 +51,8 @@ module.exports = function (ctx) {
       // transpile: false,
       env: {
         MAINNET_FEATURE:false,
-        INSECURE_PASSWORD:true, //TODO dev mode only
         KEEPKEY_FEATURE:true,
         CREATE_SOFTWARE_FEATURE:false,
-        PASSWORDLESS_FEATURE:true,
         SELF_HOST_FEATURE:false,
         FIO_FEATURE:false,
         CONTACTS_FEATURE:false,
@@ -62,20 +60,6 @@ module.exports = function (ctx) {
         UI_LIGHT_MODE_FEATURE:false,
         ADD_WALLET_FEATURE:true,
         UI_APP_STORE_FEATURE:true,
-        FEATURE_RECOVER_HARDWARE:false,
-        FEATURE_RESTORE_KEYSTORE:false,
-        FEATURE_BITCOIN_BLOCKCHAIN:true,
-        FEATURE_ETHEREUM_BLOCKCHAIN:true,
-        FEATURE_THORCHAIN_BLOCKCHAIN:true,
-        FEATURE_COSMOS_BLOCKCHAIN:true,
-        FEATURE_SECRET_BLOCKCHAIN:true,
-        FEATURE_KAVA_BLOCKCHAIN:true,
-        FEATURE_TERRA_BLOCKCHAIN:true,
-        URL_PIONEER_SPEC: JSON.stringify("https://pioneers.dev/spec/swagger.json"),
-        URL_PIONEER_WS: JSON.stringify("wss://pioneers.dev"),
-        // URL_PIONEER_SPEC: JSON.stringify("http://127.0.0.1:9001/spec/swagger.json"),
-        // URL_PIONEER_WS: JSON.stringify("ws://127.0.0.1:9001"),
-        PIONEER_URL: JSON.stringify("pioneers.dev"),
       },
 
       // Add dependencies for transpiling with Babel (Array of string/regex)
