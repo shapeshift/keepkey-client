@@ -18,7 +18,7 @@ const CryptoJS = require("crypto-js")
 const bip39 = require(`bip39`)
 let wait = require('wait-promise');
 let sleep = wait.sleep;
-
+const bridge = require("@bithighlander/keepkey-bridge")
 
 /*
       MenuBar
@@ -158,5 +158,24 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (mainWindow === null) {
     createWindow()
+  }
+})
+
+
+/*
+    IPC to UI
+
+ */
+
+
+ipcMain.on('onStartBridge', async (event, data) => {
+  const tag = TAG + ' | onStartBridge | '
+  try {
+
+    //onStartBridge
+    bridge.start()
+
+  } catch (e) {
+    console.error(tag, e)
   }
 })

@@ -64,21 +64,13 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getUsername',
-      'getTotal',
-      'wallets',
-      'devices',
-      'getPioneerLive',
-      'getPioneerUrl',
-      'getMnemonic',
-      'getBalances',
     ])
   },
   mounted() {
     try {
       console.log("Main Layout Mounted!")
       //Open connect
-
+      this.$q.electron.ipcRenderer.send('onStartBridge', {});
 
     } catch (e) {
       console.error(e);
@@ -102,9 +94,6 @@ export default {
     openSettings() {
       console.log("Naving to settings!")
       this.$router.go('Settings');
-    },
-    formatToPriceUSD(value) {
-      return `$ ${Number(value).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
     },
     toggleBodyClass(addRemoveClass, className) {
       const el = document.body
