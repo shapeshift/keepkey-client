@@ -24,9 +24,8 @@
     "fix": "./node_modules/.bin/electron-builder install-app-deps"
   },
   "dependencies": {
-    "@bithighlander/hdwallet-keepkey": "^1.10.14",
-    "@bithighlander/keepkey-bridge": "^0.0.12",
     "@chenfengyuan/vue-qrcode": "^1.0.2",
+    "@keepkey/keepkey-bridge": "^0.0.6",
     "@peculiar/webcrypto": "^1.1.4",
     "@quasar/extras": "^1.10.4",
     "animated-number-vue": "^1.0.0",
@@ -53,7 +52,8 @@
     "vue-i18n": "^8.24.4",
     "vue-moment": "^4.1.0",
     "vue-native-websocket": "^2.0.14",
-    "vue2-transitions": "^0.3.0"
+    "vue2-transitions": "^0.3.0",
+    "wait-promise": "^0.4.1"
   },
   "devDependencies": {
     "@quasar/app": "^2.2.6",

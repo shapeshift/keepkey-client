@@ -131,7 +131,6 @@
                 {{devices}}
               </div>
               Keepkey Wallet file generated from pubkeys.
-
               <div>
                 <small>dir /.pioneer/wallets/deviceId*.watch.wallet.json</small>
               </div>
@@ -148,11 +147,19 @@
       >
 
         <q-btn
-          @click="goBack"
+          @click="updateStatus"
           class="full-width"
           align="left"
           size="lg"
-          label="Go Back"
+          label="update"
+        />
+
+        <q-btn
+                @click="close"
+                class="full-width"
+                align="left"
+                size="lg"
+                label="exit"
         />
 
       </q-form>
@@ -204,9 +211,7 @@
                 alert(" KeepKey device is claimed by a seperate Application! \n 1. please close all browser tabs \n 2. exit any other keepkey applications \n 3. disconect device  \n 4. reconnect device")
               }
 
-
               if(data.state.state === 4){
-
                 this.keepKeyUnlocked = true
                 this.keepKeyConnectedComputer = true
                 this.keepKeyInUsbList = true
@@ -300,12 +305,16 @@
           this.$q.electron.ipcRenderer.send('onPairKeepKey', {});
         },
         getUsbInfo: function () {
-          //
+          //getUsbDevices
           this.$q.electron.ipcRenderer.send('getUsbDevices', {});
         },
         startHardwareConnection: function () {
-          //
+          //startHardware
           this.$q.electron.ipcRenderer.send('startHardware', {});
+        },
+        updateStatus: function () {
+          //updateStatus
+          this.$q.electron.ipcRenderer.send('updateKeepKeyState', {});
         },
         openStartup: function () {
           this.hideModal()

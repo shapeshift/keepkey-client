@@ -5,11 +5,23 @@
     </div>
       <q-card>
         <div v-if="!context" class="centered">
-          <h4>Loading...</h4>
-          <div class="compass">
-            <div class="needle">
-            </div>
+          <div align="center">
+            status: {{status}}
+            <br/>
+            code: {{code}}
+            <br/>
+            url: {{bridgeUrl}}
+            <br/>
+            <q-btn @click="startBridge" color="primary" label="Start Bridge" />
+            <br/>
+            <q-btn @click="stopBridge" color="red" label="Stop Bridge" />
           </div>
+
+<!--          <h4>Loading...</h4>-->
+<!--          <div class="compass">-->
+<!--            <div class="needle">-->
+<!--            </div>-->
+<!--          </div>-->
         </div>
         <div v-if="context">
           <div>
@@ -58,6 +70,7 @@
       return {
         context:null,
         duration: 500,
+        bridgeUrl:"",
         queryKey:"",
         coins:[],
         walletInfo: {},
@@ -66,13 +79,13 @@
         apps:[],
         devMode:false,
         installing: [],
-        status:"online",
+        status:"unknown",
+        code:0,
         draggable: true,
         resizable: true,
         responsive: true,
         index: 0,
         show: false,
-        from: {address:'testingaddy'} || null,
         copyText: 'Copy Address'
       }
     },
@@ -88,6 +101,22 @@
       }
     },
     watch: {
+      "$store.state.keepKeyStatus": {
+        handler: function(value) {
+          //get value
+          this.status = this.$store.getters['getKeepKeyStatus'];
+          console.log("watch: this.status: ",this.status)
+        },
+        immediate: true
+      },
+      "$store.state.keepKeyState": {
+        handler: function() {
+          //get value
+          this.code = this.$store.getters['getKeepKeyState'];
+          console.log("watch: this.status: ",this.status)
+        },
+        immediate: true
+      },
       "$store.state.context": {
         handler: function(value) {
           //get value
@@ -110,12 +139,15 @@
       onMainClick() {
         console.log("Main Click")
       },
+      startBridge() {
+        console.log("Starting Bridge: ")
+        this.showModal('HardwareConnect')
+      },
+      stopBridge() {
+        console.log("Stop Bridge: ")
+      },
       updateWalletContext() {
 
-      },
-      openPair(item) {
-        console.log("item Click: ",item)
-        this.showModal('Pair')
       },
       onItemClick(context) {
         console.log("set context: ",context)

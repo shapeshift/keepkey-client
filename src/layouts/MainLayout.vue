@@ -72,6 +72,9 @@ export default {
       //Open connect
       this.$q.electron.ipcRenderer.send('onStartBridge', {});
 
+      //handle ipc events
+
+
     } catch (e) {
       console.error(e);
     }

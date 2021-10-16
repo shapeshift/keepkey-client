@@ -49,6 +49,16 @@ export default store => {
 
   })
 
+  ipcRenderer.on('setKeepKeyState', (event, data) => {
+    console.log('setKeepKeyState', data)
+    store.commit('setKeepKeyState',data.state)
+  })
+
+  ipcRenderer.on('setKeepKeyStatus', (event, data) => {
+    console.log('setKeepKeyStatus', data)
+    store.commit('setKeepKeyStatus',data.status)
+  })
+
   store.subscribe(( mutation) => {
     if (mutation.type === 'Something') {
       console.log('something called')

@@ -14,11 +14,12 @@ const TAG = ' | ELECTRON-MAIN | '
 const log = require('electron-log');
 import { app, Menu, Tray, BrowserWindow, nativeTheme, ipcMain, Notification, shell } from 'electron'
 const { menubar } = require('menubar');
-const CryptoJS = require("crypto-js")
 const bip39 = require(`bip39`)
 let wait = require('wait-promise');
 let sleep = wait.sleep;
-const bridge = require("@bithighlander/keepkey-bridge")
+const bridge = require("@keepkey/keepkey-bridge")
+
+const EVENT_LOG = []
 
 /*
       MenuBar
@@ -164,16 +165,57 @@ app.on('activate', () => {
 
 /*
     IPC to UI
-
  */
 
+ipcMain.on('updateKeepKeyState', async (event, data) => {
+  const tag = TAG + ' | updateKeepKeyState | '
+  try {
+
+    let state = bridge.hardwareState()
+    log.info(tag,"state: ",state)
+    event.sender.send('setKeepKeyState',{
+      status:state.state
+    })
+
+    event.sender.send('setKeepKeyStatus',{
+      status:state.msg
+    })
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
 
 ipcMain.on('onStartBridge', async (event, data) => {
   const tag = TAG + ' | onStartBridge | '
   try {
 
+    //start server
+    let startServer = await bridge.startServer()
+    //TODO handle port claimed
+    log.info("startServer: ",startServer)
+
     //onStartBridge
-    bridge.start()
+    let kk = await bridge.startKeepkey()
+
+    let state = bridge.hardwareState()
+    log.info(tag,"state: ",state)
+    event.sender.send('setKeepKeyState',{
+      state:state.state
+    })
+
+    event.sender.send('setKeepKeyStatus',{
+      status:state.msg
+    })
+
+    //bridge on event
+    kk.events.on('event', async function(event) {
+      log.info(tag,"event: ",event)
+      EVENT_LOG.push(event)
+
+      //TODO handle events push to renderer
+
+    });
 
   } catch (e) {
     console.error(tag, e)
