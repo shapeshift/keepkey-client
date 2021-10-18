@@ -197,11 +197,13 @@ ipcMain.on('onStartBridge', async (event, data) => {
           let output = {
             data:Buffer.from(resp).toString('hex')
           }
+          console.log("output: ",output)
           res.status(200).json(output)
         } else if(req.method === 'POST') {
           let body = req.body
           let msg = Buffer.from(body.data, "hex")
           transport.writeChunk(msg)
+          console.log("input: ",msg)
           res.status(200).json({ })
         } else {
           throw Error('unhandled')

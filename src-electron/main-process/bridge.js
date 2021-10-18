@@ -30,6 +30,7 @@ app.all('/exchange/device', async function (req, res, next) {
             let body = req.body
             let msg = Buffer.from(body.data, "hex")
             WALLET_TRANSPORT.writeChunk(msg)
+            console.log("")
             res.status(200).json({ })
         } else {
             throw Error('unhandled')
