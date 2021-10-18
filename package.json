@@ -25,19 +25,22 @@
   },
   "dependencies": {
     "@chenfengyuan/vue-qrcode": "^1.0.2",
-    "@keepkey/keepkey-bridge": "^0.0.6",
     "@peculiar/webcrypto": "^1.1.4",
     "@quasar/extras": "^1.10.4",
+    "@shapeshiftoss/hdwallet-keepkey-nodewebusb": "^1.16.11",
     "animated-number-vue": "^1.0.0",
     "app-root-dir": "^1.0.2",
     "assert": "^2.0.0",
     "axios": "^0.18.1",
     "bcryptjs": "^2.4.3",
     "bip39": "^3.0.4",
+    "body-parser": "^1.19.0",
     "chalk": "^4.1.1",
     "core-js": "^3.13.0",
+    "cors": "^2.8.5",
     "countup.js": "^2.0.7",
     "electron-log": "^4.3.4",
+    "express": "^4.17.1",
     "figlet": "^1.5.0",
     "generate-password": "^1.6.0",
     "identicon.js": "^2.3.3",
@@ -53,7 +56,8 @@
     "vue-moment": "^4.1.0",
     "vue-native-websocket": "^2.0.14",
     "vue2-transitions": "^0.3.0",
-    "wait-promise": "^0.4.1"
+    "wait-promise": "^0.4.1",
+    "webusb": "^2.2.0"
   },
   "devDependencies": {
     "@quasar/app": "^2.2.6",

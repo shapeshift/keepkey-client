@@ -17,7 +17,19 @@ const { menubar } = require('menubar');
 const bip39 = require(`bip39`)
 let wait = require('wait-promise');
 let sleep = wait.sleep;
-const bridge = require("@keepkey/keepkey-bridge")
+
+//bridge
+import * as core from "@shapeshiftoss/hdwallet-core"
+import { NodeWebUSBKeepKeyAdapter, NodeWebUSBAdapterDelegate } from "@shapeshiftoss/hdwallet-keepkey-nodewebusb";
+const adapter = NodeWebUSBKeepKeyAdapter.useKeyring(new core.Keyring())
+const express = require( "express" );
+const bodyParser = require("body-parser");
+const cors = require('cors')
+const server = express();
+server.use(cors())
+server.use(bodyParser.urlencoded({ extended: false }));
+server.use(bodyParser.json());
+//end
 
 const EVENT_LOG = []
 
@@ -167,55 +179,51 @@ app.on('activate', () => {
     IPC to UI
  */
 
-ipcMain.on('updateKeepKeyState', async (event, data) => {
-  const tag = TAG + ' | updateKeepKeyState | '
-  try {
 
-    let state = bridge.hardwareState()
-    log.info(tag,"state: ",state)
-    event.sender.send('setKeepKeyState',{
-      status:state.state
-    })
-
-    event.sender.send('setKeepKeyStatus',{
-      status:state.msg
-    })
-
-  } catch (e) {
-    console.error(tag, e)
-  }
-})
 
 ipcMain.on('onStartBridge', async (event, data) => {
   const tag = TAG + ' | onStartBridge | '
   try {
+    let device = await adapter.getDevice()
+    let transport = await adapter.getTransportDelegate(device)
+    await transport.connect?.()
 
-    //start server
-    let startServer = await bridge.startServer()
-    //TODO handle port claimed
-    log.info("startServer: ",startServer)
-
-    //onStartBridge
-    let kk = await bridge.startKeepkey()
-
-    let state = bridge.hardwareState()
-    log.info(tag,"state: ",state)
-    event.sender.send('setKeepKeyState',{
-      state:state.state
-    })
-
-    event.sender.send('setKeepKeyStatus',{
-      status:state.msg
-    })
-
-    //bridge on event
-    kk.events.on('event', async function(event) {
-      log.info(tag,"event: ",event)
-      EVENT_LOG.push(event)
-
-      //TODO handle events push to renderer
-
+    let API_PORT = process.env["API_PORT_BRIDGE"] || "1646"
+    //bridge
+    server.all('/exchange/device', async function (req, res, next) {
+      try{
+        if(req.method === 'GET'){
+          let resp = await transport.readChunk()
+          let output = {
+            data:Buffer.from(resp).toString('hex')
+          }
+          res.status(200).json(output)
+        } else if(req.method === 'POST') {
+          let body = req.body
+          let msg = Buffer.from(body.data, "hex")
+          transport.writeChunk(msg)
+          res.status(200).json({ })
+        } else {
+          throw Error('unhandled')
+        }
+        next()
+      }catch(e){
+        log.error(e)
+        throw e
+      }
     });
+
+    //catchall
+    server.use((err, req, res, next) => {
+      const { status = 500, message = 'something went wrong. ', data = {} } = err
+      log.error(message)
+      res.status(status).json({ message, data })
+    })
+
+    //
+    server.listen( API_PORT, () => {
+      console.log( `server started at http://localhost:${ API_PORT }` );
+    } );
 
   } catch (e) {
     console.error(tag, e)
