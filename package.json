@@ -50,6 +50,7 @@
     "quasar": "^1.15.13",
     "spectron": "^11.0.0",
     "unique-names-generator": "^4.3.1",
+    "usb": "^1.8.0",
     "uuid": "^8.3.2",
     "vue-grid-layout": "^2.3.12",
     "vue-i18n": "^8.24.4",

@@ -10,20 +10,8 @@ import os from 'os'
 // eslint-disable-next-line
 const mkdirp = require('mkdirp')
 
-// const appRootDir = require('app-root-dir')
-//   .get()
-//   .replace('app.asar', '')
-//   .replace(/(\s+)/g, '\\$1')
 
 export const rootDir = require('app-root-dir').get()
-
-export const moneroNode = 'http://node.moneroworld.com:18089'
-export const cosmosNode = ''
-export const infuraNode = ''
-
-// TODO this needs to be public repo to work!
-export const releaseUrl = ''
-export const downloadUrl = ''
 
 // defaults
 

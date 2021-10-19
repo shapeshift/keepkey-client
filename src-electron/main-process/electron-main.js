@@ -15,8 +15,9 @@ const log = require('electron-log');
 import { app, Menu, Tray, BrowserWindow, nativeTheme, ipcMain, Notification, shell } from 'electron'
 const { menubar } = require('menubar');
 const bip39 = require(`bip39`)
-let wait = require('wait-promise');
-let sleep = wait.sleep;
+const wait = require('wait-promise');
+const sleep = wait.sleep;
+const usb = require('usb')
 
 //bridge
 import * as core from "@shapeshiftoss/hdwallet-core"
@@ -179,53 +180,76 @@ app.on('activate', () => {
     IPC to UI
  */
 
+let STATE = 'init'
 
+const start_bridge = async function(){
+  try{
+    let device = await adapter.getDevice()
+    if(!device) STATE = 'no device!'
+    if(device){
+      let transport = await adapter.getTransportDelegate(device)
+      await transport.connect?.()
+
+      let API_PORT = process.env["API_PORT_BRIDGE"] || "1646"
+      //bridge
+      server.all('/exchange/device', async function (req, res, next) {
+        try{
+          if(req.method === 'GET'){
+            let resp = await transport.readChunk()
+            let output = {
+              data:Buffer.from(resp).toString('hex')
+            }
+            console.log("output: ",output)
+            res.status(200).json(output)
+          } else if(req.method === 'POST') {
+            let body = req.body
+            let msg = Buffer.from(body.data, "hex")
+            transport.writeChunk(msg)
+            console.log("input: ",msg)
+            res.status(200).json({ })
+          } else {
+            throw Error('unhandled')
+          }
+          next()
+        }catch(e){
+          log.error(e)
+          throw e
+        }
+      });
+
+      //catchall
+      server.use((err, req, res, next) => {
+        const { status = 500, message = 'something went wrong. ', data = {} } = err
+        log.error(message)
+        res.status(status).json({ message, data })
+      })
+
+      //port
+      server.listen( API_PORT, () => {
+        console.log( `server started at http://localhost:${ API_PORT }` );
+      } );
+
+    } else {
+      console.log("Can not start! waiting for device connect")
+    }
+  }catch(e){
+    console.error(e)
+  }
+}
 
 ipcMain.on('onStartBridge', async (event, data) => {
   const tag = TAG + ' | onStartBridge | '
   try {
-    let device = await adapter.getDevice()
-    let transport = await adapter.getTransportDelegate(device)
-    await transport.connect?.()
+    start_bridge()
 
-    let API_PORT = process.env["API_PORT_BRIDGE"] || "1646"
-    //bridge
-    server.all('/exchange/device', async function (req, res, next) {
-      try{
-        if(req.method === 'GET'){
-          let resp = await transport.readChunk()
-          let output = {
-            data:Buffer.from(resp).toString('hex')
-          }
-          console.log("output: ",output)
-          res.status(200).json(output)
-        } else if(req.method === 'POST') {
-          let body = req.body
-          let msg = Buffer.from(body.data, "hex")
-          transport.writeChunk(msg)
-          console.log("input: ",msg)
-          res.status(200).json({ })
-        } else {
-          throw Error('unhandled')
-        }
-        next()
-      }catch(e){
-        log.error(e)
-        throw e
-      }
-    });
-
-    //catchall
-    server.use((err, req, res, next) => {
-      const { status = 500, message = 'something went wrong. ', data = {} } = err
-      log.error(message)
-      res.status(status).json({ message, data })
+    usb.on('attach', function(device) {
+      console.log("attach device: ",device)
+      start_bridge()
     })
 
-    //
-    server.listen( API_PORT, () => {
-      console.log( `server started at http://localhost:${ API_PORT }` );
-    } );
+    usb.on('detach', function(device) {
+      console.log("detach device: ",device)
+    })
 
   } catch (e) {
     console.error(tag, e)
