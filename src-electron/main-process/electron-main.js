@@ -24,10 +24,11 @@ const adapter = NodeWebUSBKeepKeyAdapter.useKeyring(new core.Keyring())
 const express = require( "express" );
 const bodyParser = require("body-parser");
 const cors = require('cors')
-const server = express();
-server.use(cors())
-server.use(bodyParser.urlencoded({ extended: false }));
-server.use(bodyParser.json());
+const appExpress = express();
+appExpress.use(cors())
+appExpress.use(bodyParser.urlencoded({ extended: false }));
+appExpress.use(bodyParser.json());
+let server
 
 const EVENT_LOG = []
 
@@ -213,7 +214,7 @@ const start_bridge = async function(event){
 
       let API_PORT = process.env["API_PORT_BRIDGE"] || "1646"
       //bridge
-      server.all('/exchange/device', async function (req, res, next) {
+      appExpress.all('/exchange/device', async function (req, res, next) {
         try{
           if(req.method === 'GET'){
             let resp = await transport.readChunk()
@@ -239,7 +240,7 @@ const start_bridge = async function(event){
       });
 
       //catchall
-      server.use((err, req, res, next) => {
+      appExpress.use((err, req, res, next) => {
         const { status = 500, message = 'something went wrong. ', data = {} } = err
         log.error(message)
         res.status(status).json({ message, data })
@@ -247,7 +248,7 @@ const start_bridge = async function(event){
 
       //port
       try{
-        server.listen( API_PORT, () => {
+        server = appExpress.listen( API_PORT, () => {
           event.sender.send('playSound',{ sound:'success' })
           console.log( `server started at http://localhost:${ API_PORT }` );
           STATE = 3
@@ -277,7 +278,15 @@ ipcMain.on('onStopBridge', async (event, data) => {
   const tag = TAG + ' | onStartBridge | '
   try {
     event.sender.send('playSound',{ sound:'fail' })
-    server.close(function() { console.log('shutdown server'); });
+    console.log("server: ",server)
+    server.close(() => {
+      console.log('Closed out remaining connections');
+      STATE = 2
+      STATUS = 'device connected'
+      event.sender.send('setKeepKeyState',{ state:STATE })
+      event.sender.send('setKeepKeyStatus',{ status:STATUS })
+    });
+
   } catch (e) {
     console.error(tag, e)
   }

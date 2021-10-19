@@ -8,9 +8,10 @@
           <div align="center">
             status: {{status}}
             <br/>
-            code: {{code}}
+            state: {{state}}
             <br/>
-            url: {{bridgeUrl}}
+<!--            <div></div>-->
+<!--            url: {{bridgeUrl}}-->
             <br/>
             <q-btn @click="startBridge" color="primary" label="Start Bridge" />
             <br/>
@@ -59,6 +60,7 @@
 <script>
   import { mapMutations, mapGetters } from 'vuex'
   import { copyToClipboard } from 'quasar'
+  import {ipcRenderer} from "electron";
 
 
   export default {
@@ -79,7 +81,7 @@
         devMode:false,
         installing: [],
         status:"unknown",
-        code:0,
+        state:0,
         draggable: true,
         resizable: true,
         responsive: true,
@@ -90,7 +92,27 @@
     },
     mounted() {
       try{
+        ipcRenderer.on('attach', (event, data) => {
+          console.log('attach', data)
+        })
 
+        ipcRenderer.on('detach', (event, data) => {
+          console.log('detach', data)
+        })
+
+        ipcRenderer.on('setKeepKeyState', (event, data) => {
+          console.log('setKeepKeyState', data)
+          this.state = data.state
+        })
+
+        ipcRenderer.on('setKeepKeyStatus', (event, data) => {
+          console.log('setKeepKeyStatus', data)
+          this.status = data.status
+        })
+
+        ipcRenderer.on('setDevice', (event, data) => {
+          console.log('setDevice', data)
+        })
 
       }catch(e){
         console.error(e)
