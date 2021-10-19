@@ -222,12 +222,14 @@ const start_bridge = async function(event){
               data:Buffer.from(resp).toString('hex')
             }
             console.log("output: ",output)
+            event.sender.send('dataSent',{ output })
             res.status(200).json(output)
           } else if(req.method === 'POST') {
             let body = req.body
             let msg = Buffer.from(body.data, "hex")
             transport.writeChunk(msg)
             console.log("input: ",msg)
+            event.sender.send('dataReceive',{ output:msg })
             res.status(200).json({ })
           } else {
             throw Error('unhandled')
@@ -274,9 +276,9 @@ const start_bridge = async function(event){
   }
 }
 
-ipcMain.on('onStopBridge', async (event, data) => {
-  const tag = TAG + ' | onStartBridge | '
-  try {
+const stop_bridge = async function(event){
+  try{
+
     event.sender.send('playSound',{ sound:'fail' })
     console.log("server: ",server)
     server.close(() => {
@@ -286,6 +288,17 @@ ipcMain.on('onStopBridge', async (event, data) => {
       event.sender.send('setKeepKeyState',{ state:STATE })
       event.sender.send('setKeepKeyStatus',{ status:STATUS })
     });
+
+  }catch(e){
+    console.error(e)
+  }
+}
+
+
+ipcMain.on('onStopBridge', async (event, data) => {
+  const tag = TAG + ' | onStartBridge | '
+  try {
+    stop_bridge(event)
 
   } catch (e) {
     console.error(tag, e)
@@ -316,6 +329,7 @@ ipcMain.on('onStartApp', async (event, data) => {
     usb.on('detach', function(device) {
       console.log("detach device: ",device)
       event.sender.send('detach',{ device })
+      stop_bridge(event)
     })
 
   } catch (e) {
