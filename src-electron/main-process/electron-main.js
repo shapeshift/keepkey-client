@@ -10,7 +10,7 @@
  * @type {string}
  */
 
-const TAG = ' | ELECTRON-MAIN | '
+const TAG = ' | KK-MAIN | '
 const log = require('electron-log');
 import { app, Menu, Tray, BrowserWindow, nativeTheme, ipcMain, Notification, shell } from 'electron'
 const { menubar } = require('menubar');
@@ -18,10 +18,8 @@ const bip39 = require(`bip39`)
 const wait = require('wait-promise');
 const sleep = wait.sleep;
 const usb = require('usb')
-
-//bridge
 import * as core from "@shapeshiftoss/hdwallet-core"
-import { NodeWebUSBKeepKeyAdapter, NodeWebUSBAdapterDelegate } from "@shapeshiftoss/hdwallet-keepkey-nodewebusb";
+import { NodeWebUSBKeepKeyAdapter } from "@shapeshiftoss/hdwallet-keepkey-nodewebusb";
 const adapter = NodeWebUSBKeepKeyAdapter.useKeyring(new core.Keyring())
 const express = require( "express" );
 const bodyParser = require("body-parser");
@@ -30,7 +28,6 @@ const server = express();
 server.use(cors())
 server.use(bodyParser.urlencoded({ extended: false }));
 server.use(bodyParser.json());
-//end
 
 const EVENT_LOG = []
 
@@ -177,18 +174,42 @@ app.on('activate', () => {
 
 
 /*
-    IPC to UI
+
+  KeepKey Status codes
+
+  state : status
+  ---------------
+     -1 : error
+      0 : preInit
+      1 : no devices
+      2 : device connected
+      3 : bridge online
+
+
  */
 
-let STATE = 'init'
+let STATUS = 'preInit'
+let STATE = 0
 
-const start_bridge = async function(){
+const start_bridge = async function(event){
   try{
-    let device = await adapter.getDevice()
-    if(!device) STATE = 'no device!'
+    let device
+    try{
+      device = await adapter.getDevice()
+    }catch(e){
+      STATE = 1
+      STATUS = `no devices`
+      event.sender.send('setKeepKeyState',{ state:STATE })
+      event.sender.send('setKeepKeyStatus',{ status:STATUS })
+    }
+
     if(device){
       let transport = await adapter.getTransportDelegate(device)
       await transport.connect?.()
+      STATE = 2
+      STATUS = 'keepkey connected'
+      event.sender.send('setKeepKeyState',{ state:STATE })
+      event.sender.send('setKeepKeyStatus',{ status:STATUS })
 
       let API_PORT = process.env["API_PORT_BRIDGE"] || "1646"
       //bridge
@@ -225,9 +246,24 @@ const start_bridge = async function(){
       })
 
       //port
-      server.listen( API_PORT, () => {
-        console.log( `server started at http://localhost:${ API_PORT }` );
-      } );
+      try{
+        server.listen( API_PORT, () => {
+          event.sender.send('playSound',{ sound:'success' })
+          console.log( `server started at http://localhost:${ API_PORT }` );
+          STATE = 3
+          STATUS = 'bridge online'
+          event.sender.send('setKeepKeyState',{ state:STATE })
+          event.sender.send('setKeepKeyStatus',{ status:STATUS })
+        } );
+      }catch(e){
+        event.sender.send('playSound',{ sound:'fail' })
+        STATE = -1
+        STATUS = 'bridge error'
+        event.sender.send('setKeepKeyState',{ state:STATE })
+        event.sender.send('setKeepKeyStatus',{ status:STATUS })
+        console.log("e: ",e)
+      }
+
 
     } else {
       console.log("Can not start! waiting for device connect")
@@ -237,18 +273,40 @@ const start_bridge = async function(){
   }
 }
 
+ipcMain.on('onStopBridge', async (event, data) => {
+  const tag = TAG + ' | onStartBridge | '
+  try {
+    event.sender.send('playSound',{ sound:'fail' })
+    server.close(function() { console.log('shutdown server'); });
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
 ipcMain.on('onStartBridge', async (event, data) => {
   const tag = TAG + ' | onStartBridge | '
   try {
-    start_bridge()
+
+    start_bridge(event)
+
+  } catch (e) {
+    console.error(tag, e)
+  }
+})
+
+ipcMain.on('onStartApp', async (event, data) => {
+  const tag = TAG + ' | onStartApp | '
+  try {
 
     usb.on('attach', function(device) {
       console.log("attach device: ",device)
-      start_bridge()
+      event.sender.send('attach',{ device })
+      start_bridge(event)
     })
 
     usb.on('detach', function(device) {
       console.log("detach device: ",device)
+      event.sender.send('detach',{ device })
     })
 
   } catch (e) {

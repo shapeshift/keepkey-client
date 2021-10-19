@@ -70,7 +70,7 @@ export default {
     try {
       console.log("Main Layout Mounted!")
       //Open connect
-      this.$q.electron.ipcRenderer.send('onStartBridge', {});
+      this.$q.electron.ipcRenderer.send('onStartApp', {});
 
       //handle ipc events
 

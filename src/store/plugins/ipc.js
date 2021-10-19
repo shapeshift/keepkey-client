@@ -49,6 +49,23 @@ export default store => {
 
   })
 
+  ipcRenderer.on('playSound', (event, data) => {
+    console.log('sound: ', data)
+    playSound(data.sound)
+  })
+
+  ipcRenderer.on('attach', (event, data) => {
+    console.log('attach', data)
+    playSound('success')
+    //store.commit('deviceConnect',data.state)
+  })
+
+  ipcRenderer.on('detach', (event, data) => {
+    console.log('detach', data)
+    playSound('fail')
+    //store.commit('deviceConnect',data.state)
+  })
+
   ipcRenderer.on('setKeepKeyState', (event, data) => {
     console.log('setKeepKeyState', data)
     store.commit('setKeepKeyState',data.state)
@@ -56,6 +73,11 @@ export default store => {
 
   ipcRenderer.on('setKeepKeyStatus', (event, data) => {
     console.log('setKeepKeyStatus', data)
+    store.commit('setKeepKeyStatus',data.status)
+  })
+
+  ipcRenderer.on('setDevice', (event, data) => {
+    console.log('setDevice', data)
     store.commit('setKeepKeyStatus',data.status)
   })
 

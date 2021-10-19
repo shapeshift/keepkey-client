@@ -64,7 +64,6 @@
   export default {
     name: 'Main',
     components: {
-      // AnimatedNumber
     },
     data () {
       return {
@@ -91,10 +90,7 @@
     },
     mounted() {
       try{
-        this.$nextTick(function () {
-          this.show = true;
-        })
-        setTimeout(this.updateWalletContext,2000)
+
 
       }catch(e){
         console.error(e)
@@ -136,40 +132,17 @@
     },
     methods: {
       ...mapMutations(['addApp', 'removeApp','showModal','hideModal']),
-      onMainClick() {
-        console.log("Main Click")
-      },
       startBridge() {
         console.log("Starting Bridge: ")
-        this.showModal('HardwareConnect')
+        this.$q.electron.ipcRenderer.send('onStartBridge', {});
+        //this.showModal('HardwareConnect')
       },
       stopBridge() {
         console.log("Stop Bridge: ")
-      },
-      updateWalletContext() {
-
+        this.$q.electron.ipcRenderer.send('onStopBridge', {});
       },
       onItemClick(context) {
-        console.log("set context: ",context)
-        if(context !== this.context){
-          this.context = context
-          this.$q.electron.ipcRenderer.send('setContext', {context});
-        }
-      },
-      formatToPriceUSD(value) {
-        return `$ ${Number(value).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`;
-      },
-      copyAddress (value) {
-        copyToClipboard(value)
-          .then(() => {
-            this.copyText = 'Coppied!'
-            setTimeout(() => {
-              this.copyText = 'Copy Address'
-            }, 2000)
-          })
-          .catch(() => {
-            // fail
-          })
+
       }
     }
   }
