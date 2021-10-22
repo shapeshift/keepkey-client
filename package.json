@@ -19,7 +19,7 @@
     "publish:lerna": "lerna publish from-package --yes",
     "build": "quasar build -m electron --publish never --target mac --debug",
     "build-electron-publish-macos": "quasar build -m electron --publish always --target mac --debug",
-    "build-electron-publish-ubuntu": "quasar build -m electron --publish always --target linux --debug",
+    "build-electron-publish-linux": "quasar build -m electron --publish always --target linux --debug",
     "build-electron-publish-windows": "quasar build -m electron --publish always --target win --debug",
     "fix": "./node_modules/.bin/electron-builder install-app-deps"
   },
