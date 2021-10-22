@@ -1,6 +1,6 @@
 {
   "name": "keepkey-client",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "description": "A support application for the KeepKey Hardware Wallet",
   "productName": "keepkey-client",
