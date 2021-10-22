@@ -1,6 +1,6 @@
 {
   "name": "keepkey-client",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "description": "A support application for the KeepKey Hardware Wallet",
   "productName": "keepkey-client",
@@ -18,9 +18,9 @@
     "dev": "quasar dev --mode electron",
     "publish:lerna": "lerna publish from-package --yes",
     "build": "quasar build -m electron --publish never --target mac --debug",
-    "build-electron-publish-macos-latest": "quasar build -m electron --publish always --target mac --debug",
-    "build-electron-publish-ubuntu-latest": "quasar build -m electron --publish always --target linux --debug",
-    "build-electron-publish-windows-latest": "quasar build -m electron --publish always --target win --debug",
+    "build-electron-publish-macos": "quasar build -m electron --publish always --target mac --debug",
+    "build-electron-publish-ubuntu": "quasar build -m electron --publish always --target linux --debug",
+    "build-electron-publish-windows": "quasar build -m electron --publish always --target win --debug",
     "fix": "./node_modules/.bin/electron-builder install-app-deps"
   },
   "dependencies": {

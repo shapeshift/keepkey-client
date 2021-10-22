@@ -13,10 +13,7 @@
 const TAG = ' | KK-MAIN | '
 const log = require('electron-log');
 import { app, Menu, Tray, BrowserWindow, nativeTheme, ipcMain, Notification, shell } from 'electron'
-const { menubar } = require('menubar');
-const bip39 = require(`bip39`)
 const wait = require('wait-promise');
-const sleep = wait.sleep;
 const usb = require('usb')
 import * as core from "@shapeshiftoss/hdwallet-core"
 import { NodeWebUSBKeepKeyAdapter } from "@shapeshiftoss/hdwallet-keepkey-nodewebusb";
