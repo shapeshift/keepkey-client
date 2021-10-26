@@ -19,16 +19,9 @@ import {
   BrowserWindow,
   nativeTheme,
   ipcMain,
-  Notification,
-  shell,
-  contentTracing,
-  ipcRenderer,
 } from "electron";
-const { menubar } = require("menubar");
-const bip39 = require(`bip39`);
-const wait = require("wait-promise");
-const sleep = wait.sleep;
 const usb = require("usb");
+const AutoLaunch = require('auto-launch');
 import * as core from "@shapeshiftoss/hdwallet-core";
 import { NodeWebUSBKeepKeyAdapter } from "@shapeshiftoss/hdwallet-keepkey-nodewebusb";
 const adapter = NodeWebUSBKeepKeyAdapter.useKeyring(new core.Keyring());
@@ -45,14 +38,7 @@ let tray;
 let STATE = 0;
 
 const assetsDirectory = path.join(__dirname, "assets");
-
 const EVENT_LOG = [];
-
-/*
-      MenuBar
-
-        - Osx
- */
 
 /*
     Electron Settings
@@ -113,6 +99,14 @@ const createTray = (eventIpc) => {
         createWindow()
       },
     },
+      //
+    {
+      label: "Disable Auto launch",
+      click: function(event) {
+        console.log("show App");
+        kkAutoLauncher.disable();
+      },
+    },
     { label: "", type: "separator" },
     {
       label: "Quit KeepKey Bridge",
@@ -127,29 +121,29 @@ const createTray = (eventIpc) => {
   tray.setContextMenu(contextMenu);
 };
 
-function bringWindowToFront() {
-  try {
-    //
-    mainWindow.setAlwaysOnTop(true);
-  } catch (e) {
-    log.error(e);
-  }
-}
-
-function releaseWindowFromTop() {
-  try {
-    //
-    mainWindow.setAlwaysOnTop(false);
-  } catch (e) {
-    log.error(e);
-  }
-}
-
 function createWindow() {
   /**
    * Menu Bar
    */
   log.info("Creating window!");
+
+  //Auto launch on startup
+  let kkAutoLauncher = new AutoLaunch({
+    name: 'keepkey-client',
+    path: '/Applications/kkAutoLauncher.app',
+  });
+  kkAutoLauncher.enable();
+  kkAutoLauncher.isEnabled()
+      .then(function(isEnabled){
+        if(isEnabled){
+          return;
+        }
+        kkAutoLauncher.enable();
+      })
+      .catch(function(err){
+        console.error('failed to enable auto launch: ',kkAutoLauncher)
+      });
+
   /**
    * Initial window options
    *
@@ -245,6 +239,7 @@ const start_bridge = async function(event) {
               data: Buffer.from(resp).toString("hex"),
             };
             console.log("output: ", output);
+            EVENT_LOG.push({read:output})
             event.sender.send("dataSent", { output });
             res.status(200).json(output);
           } else if (req.method === "POST") {
@@ -252,6 +247,7 @@ const start_bridge = async function(event) {
             let msg = Buffer.from(body.data, "hex");
             transport.writeChunk(msg);
             console.log("input: ", msg);
+            EVENT_LOG.push({write:output})
             event.sender.send("dataReceive", { output: msg });
             res.status(200).json({});
           } else {
