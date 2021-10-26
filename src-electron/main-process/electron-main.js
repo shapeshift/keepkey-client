@@ -31,7 +31,6 @@ const sleep = wait.sleep;
 const usb = require("usb");
 import * as core from "@shapeshiftoss/hdwallet-core";
 import { NodeWebUSBKeepKeyAdapter } from "@shapeshiftoss/hdwallet-keepkey-nodewebusb";
-import ipc from "src/store/plugins/ipc";
 const adapter = NodeWebUSBKeepKeyAdapter.useKeyring(new core.Keyring());
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -79,30 +78,9 @@ if (process.env.PROD) {
 }
 
 let mainWindow;
-// let approveWindow
-
-//TODO :pray: someday menubar again?
-// function createPreviewDashboard(){
-//   previewWindow = new BrowserWindow({
-//     width: 1000,
-//     height: 600,
-//     useContentSize: true,
-//     webPreferences: {
-//       // Change from /quasar.conf.js > electron > nodeIntegration;
-//       // More info: https://quasar.dev/quasar-cli/developing-electron-apps/node-integration
-//       nodeIntegration: process.env.QUASAR_NODE_INTEGRATION,
-//       nodeIntegrationInWorker: process.env.QUASAR_NODE_INTEGRATION,
-//
-//       // More info: /quasar-cli/developing-electron-apps/electron-preload-script
-//       // preload: path.resolve(__dirname, 'electron-preload.js')
-//     }
-//   })
-//   return previewWindow
-// }
-
 const lightDark = nativeTheme.shouldUseDarkColors ? "dark" : "light";
 
-const createTray = () => {
+const createTray = (eventIpc) => {
   const trayIcon = `${lightDark}/keepKey/unknown.png`;
   tray = new Tray(path.join(assetsDirectory, trayIcon));
   const contextMenu = Menu.buildFromTemplate([
@@ -116,15 +94,23 @@ const createTray = () => {
     {
       label: "Start Bridge",
       click: function(event) {
+        start_bridge(eventIpc)
         console.log("start bridge!!");
       },
       enabled: STATE === 3 ? false : true,
     },
     {
       label: "Stop Bridge",
-      enabled: STATE === 3 ? true : false,
       click: function(event) {
         console.log("stop bridge");
+        stop_bridge(eventIpc)
+      },
+    },
+    {
+      label: "Show App",
+      click: function(event) {
+        console.log("show App");
+        createWindow()
       },
     },
     { label: "", type: "separator" },
@@ -133,6 +119,8 @@ const createTray = () => {
       type: "normal",
       click: function(event) {
         console.log("quit bridge");
+        app.quit()
+        process.exit(0);
       },
     },
   ]);
@@ -161,33 +149,15 @@ function createWindow() {
   /**
    * Menu Bar
    */
-  //TODO crash (only on build) image could not be created from "blabla" menu-icon-large.png
   log.info("Creating window!");
-  //TODO why this no work?
-  // previewWindow = createPreviewDashboard()
-
-  // const tray = new Tray(iconPath);
-  // const contextMenu = Menu.buildFromTemplate([
-  //   {
-  //     label: 'Open App', type: 'radio', click(){
-  //       console.log("Open App was clicked!")
-  //     }
-  //   }
-  // ])
-  // tray.setToolTip('This is my application.')
-  // tray.setContextMenu(contextMenu)
-
-  //TODO focus on event https://stackoverflow.com/questions/53702044/how-do-i-bring-a-window-to-the-front-without-switching-apps-in-electron/62942825
-
   /**
    * Initial window options
    *
    * more options: https://www.electronjs.org/docs/api/browser-window
    */
-  createTray();
   mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 600,
+    width: 400,
+    height: 250,
     useContentSize: true,
     //TODO make toggle
     //remember last setting?
@@ -207,6 +177,7 @@ function createWindow() {
 
   mainWindow.on("closed", () => {
     mainWindow = null;
+    tray = null
   });
 }
 
@@ -367,6 +338,8 @@ ipcMain.on("onStartBridge", async (event, data) => {
 ipcMain.on("onStartApp", async (event, data) => {
   const tag = TAG + " | onStartApp | ";
   try {
+    createTray(event);
+
     usb.on("attach", function(device) {
       console.log("attach device: ", device);
       event.sender.send("attach", { device });
