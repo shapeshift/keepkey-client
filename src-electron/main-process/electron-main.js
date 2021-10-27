@@ -12,16 +12,9 @@
 
 const TAG = " | KK-MAIN | ";
 const log = require("electron-log");
-import {
-  app,
-  Menu,
-  Tray,
-  BrowserWindow,
-  nativeTheme,
-  ipcMain,
-} from "electron";
+import { app, Menu, Tray, BrowserWindow, nativeTheme, ipcMain } from "electron";
 const usb = require("usb");
-const AutoLaunch = require('auto-launch');
+const AutoLaunch = require("auto-launch");
 import * as core from "@shapeshiftoss/hdwallet-core";
 import { NodeWebUSBKeepKeyAdapter } from "@shapeshiftoss/hdwallet-keepkey-nodewebusb";
 const adapter = NodeWebUSBKeepKeyAdapter.useKeyring(new core.Keyring());
@@ -36,6 +29,8 @@ const path = require("path");
 let server;
 let tray;
 let STATE = 0;
+let isQuitting = false;
+let eventIPC;
 
 const assetsDirectory = path.join(__dirname, "assets");
 const EVENT_LOG = [];
@@ -66,59 +61,105 @@ if (process.env.PROD) {
 let mainWindow;
 const lightDark = nativeTheme.shouldUseDarkColors ? "dark" : "light";
 
+const menuTemplate = [
+  {
+    label: "Bridge Not Running",
+    enabled: false,
+    type: "normal",
+    icon: path.join(assetsDirectory, "status/unknown.png"),
+  },
+  { label: "", type: "separator" },
+  {
+    label: "Start Bridge",
+    click: function(event) {
+      start_bridge(eventIPC);
+      console.log("start bridge!!");
+    },
+    enabled: true,
+  },
+  {
+    label: "Stop Bridge",
+    enabled: false,
+    click: function(event) {
+      console.log("stop bridge");
+      stop_bridge(eventIPC);
+    },
+  },
+  //
+  { label: "", type: "separator" },
+  {
+    label: "Toggle App",
+    click: function(event) {
+      console.log("show App");
+      if (mainWindow.isVisible()) {
+        mainWindow.hide();
+        app.dock.hide();
+      } else {
+        mainWindow.show();
+        app.dock.hide();
+      }
+    },
+  },
+  {
+    label: "Disable Auto Launch",
+    click: function(event) {
+      console.log("show App");
+      kkAutoLauncher.disable();
+    },
+  },
+  {
+    label: "Quit KeepKey Bridge",
+    type: "normal",
+    click: function(event) {
+      console.log("quit bridge");
+      app.quit();
+      process.exit(0);
+    },
+  },
+];
+
 const createTray = (eventIpc) => {
+  eventIPC = eventIpc;
   const trayIcon = `${lightDark}/keepKey/unknown.png`;
   tray = new Tray(path.join(assetsDirectory, trayIcon));
-  const contextMenu = Menu.buildFromTemplate([
-    {
-      label: "Unknown",
-      enabled: false,
-      type: "normal",
-      icon: path.join(assetsDirectory, "status/unknown.png"),
-    },
-    { label: "", type: "separator" },
-    {
-      label: "Start Bridge",
-      click: function(event) {
-        start_bridge(eventIpc)
-        console.log("start bridge!!");
-      },
-      enabled: STATE === 3 ? false : true,
-    },
-    {
-      label: "Stop Bridge",
-      click: function(event) {
-        console.log("stop bridge");
-        stop_bridge(eventIpc)
-      },
-    },
-    {
-      label: "Show App",
-      click: function(event) {
-        console.log("show App");
-        createWindow()
-      },
-    },
-      //
-    {
-      label: "Disable Auto launch",
-      click: function(event) {
-        console.log("show App");
-        kkAutoLauncher.disable();
-      },
-    },
-    { label: "", type: "separator" },
-    {
-      label: "Quit KeepKey Bridge",
-      type: "normal",
-      click: function(event) {
-        console.log("quit bridge");
-        app.quit()
-        process.exit(0);
-      },
-    },
-  ]);
+  const contextMenu = Menu.buildFromTemplate(menuTemplate);
   tray.setContextMenu(contextMenu);
+};
+
+const updateMenu = (status) => {
+  let icon = "unknown";
+  switch (status) {
+    case -1:
+      menuTemplate[0].label = "Error";
+      menuTemplate[0].icon = path.join(assetsDirectory, "status/error.png");
+      icon = "error";
+      break;
+    case 0:
+      menuTemplate[0].label = "Initializing";
+      menuTemplate[0].icon = path.join(assetsDirectory, "status/unknown.png");
+      icon = "unknown";
+      break;
+    case 1:
+      menuTemplate[0].label = "No Devices";
+      menuTemplate[0].icon = path.join(assetsDirectory, "status/unknown.png");
+      icon = "unknown";
+      break;
+    case 2:
+      menuTemplate[0].label = "Bridge Not Running";
+      menuTemplate[0].icon = path.join(assetsDirectory, "status/unknown.png");
+      icon = "unknown";
+      break;
+    case 3:
+      menuTemplate[0].label = "Bridge Running";
+      menuTemplate[0].icon = path.join(assetsDirectory, "status/success.png");
+      menuTemplate[2].enabled = false;
+      menuTemplate[3].enabled = true;
+      icon = "success";
+      break;
+  }
+  const updatedMenu = Menu.buildFromTemplate(menuTemplate);
+  tray.setContextMenu(updatedMenu);
+  tray.setImage(path.join(assetsDirectory, `${lightDark}/keepKey/${icon}.png`));
 };
 
 function createWindow() {
@@ -129,20 +170,21 @@ function createWindow() {
 
   //Auto launch on startup
   let kkAutoLauncher = new AutoLaunch({
-    name: 'keepkey-client',
-    path: '/Applications/kkAutoLauncher.app',
+    name: "keepkey-client",
+    path: "/Applications/kkAutoLauncher.app",
   });
   kkAutoLauncher.enable();
-  kkAutoLauncher.isEnabled()
-      .then(function(isEnabled){
-        if(isEnabled){
-          return;
-        }
-        kkAutoLauncher.enable();
-      })
-      .catch(function(err){
-        console.error('failed to enable auto launch: ',kkAutoLauncher)
-      });
+  kkAutoLauncher
+    .isEnabled()
+    .then(function(isEnabled) {
+      if (isEnabled) {
+        return;
+      }
+      kkAutoLauncher.enable();
+    })
+    .catch(function(err) {
+      console.error("failed to enable auto launch: ", kkAutoLauncher);
+    });
 
   /**
    * Initial window options
@@ -169,10 +211,17 @@ function createWindow() {
 
   mainWindow.loadURL(process.env.APP_URL);
 
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-    tray = null
+  mainWindow.on("close", (e) => {
+    if (!isQuitting) {
+      e.preventDefault();
+      mainWindow.hide();
+      app.dock.hide();
+    }
   });
+
+  // mainWindow.on("closed", () => {
+
+  // });
 }
 
 app.setAsDefaultProtocolClient("keepkey");
@@ -190,6 +239,10 @@ app.on("activate", () => {
   if (mainWindow === null) {
     createWindow();
   }
+});
+
+app.on("before-quit", () => {
+  isQuitting = true;
 });
 
 /*
@@ -219,6 +272,7 @@ const start_bridge = async function(event) {
       STATUS = `no devices`;
       event.sender.send("setKeepKeyState", { state: STATE });
       event.sender.send("setKeepKeyStatus", { status: STATUS });
+      console.log(tray);
     }
 
     if (device) {
@@ -239,7 +293,7 @@ const start_bridge = async function(event) {
               data: Buffer.from(resp).toString("hex"),
             };
             console.log("output: ", output);
-            EVENT_LOG.push({read:output})
+            EVENT_LOG.push({ read: output });
             event.sender.send("dataSent", { output });
             res.status(200).json(output);
           } else if (req.method === "POST") {
@@ -247,7 +301,7 @@ const start_bridge = async function(event) {
             let msg = Buffer.from(body.data, "hex");
             transport.writeChunk(msg);
             console.log("input: ", msg);
-            EVENT_LOG.push({write:output})
+            EVENT_LOG.push({ write: output });
             event.sender.send("dataReceive", { output: msg });
             res.status(200).json({});
           } else {
@@ -280,6 +334,7 @@ const start_bridge = async function(event) {
           STATUS = "bridge online";
           event.sender.send("setKeepKeyState", { state: STATE });
           event.sender.send("setKeepKeyStatus", { status: STATUS });
+          updateMenu(STATE);
         });
       } catch (e) {
         event.sender.send("playSound", { sound: "fail" });
@@ -287,6 +342,7 @@ const start_bridge = async function(event) {
         STATUS = "bridge error";
         event.sender.send("setKeepKeyState", { state: STATE });
         event.sender.send("setKeepKeyStatus", { status: STATUS });
+        updateMenu(STATE);
         console.log("e: ", e);
       }
     } else {
@@ -307,6 +363,7 @@ const stop_bridge = async function(event) {
       STATUS = "device connected";
       event.sender.send("setKeepKeyState", { state: STATE });
       event.sender.send("setKeepKeyStatus", { status: STATUS });
+      updateMenu(STATE);
     });
   } catch (e) {
     console.error(e);
