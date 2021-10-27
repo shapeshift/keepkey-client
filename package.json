@@ -24,6 +24,7 @@
     "fix": "./node_modules/.bin/electron-builder install-app-deps"
   },
   "dependencies": {
+    "@babel/runtime": "^7.15.4",
     "@chenfengyuan/vue-qrcode": "^1.0.2",
     "@peculiar/webcrypto": "^1.1.4",
     "@quasar/extras": "^1.10.4",
