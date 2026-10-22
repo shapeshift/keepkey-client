@@ -81,6 +81,6 @@ workflows:
   version: 2
   keepkey-native:
     jobs:
-      - build-native-mac
-      - build-native-windows
-      - build-native-linux
+      - build-native-mac: *only_master
+      - build-native-windows: *only_master
+      - build-native-linux: *only_master
