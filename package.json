@@ -93,5 +93,8 @@
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   },
-  "gitHead": "642c66c1972ca9482e90d1840c26298ea1c369c9"
+  "gitHead": "642c66c1972ca9482e90d1840c26298ea1c369c9",
+  "overrides": {
+    "launch-editor": "2.14.2"
+  }
 }
